@@ -1,17 +1,21 @@
 <?php
-// Get parameters
-if(!isset($_GET['year']) || !isset($_GET['day']) || !isset($_GET['category'])) {
-	die("Please specify the parameters. Sample: ?year=2005&day=March_13&category=births");
+// Build condition
+$cond = array();
+if(isset($_GET['day'])) {
+	if(preg_match("/^([a-z]+)_([0-9]+)$/i", $_GET['day'], $output_array) === 0) {
+		die("Same problems with <strong>day</strong> parameter.");
+	}
+	$cond['day'] = $_GET['day'];
 }
-// I received what I expect?
-$_year = (int)$_GET['year'];
-if(preg_match("/^([a-z]+)_([0-9]+)$/i", $_GET['day'], $output_array) === 0) {
-	die("Same problems with <strong>day</strong> parameter.");
+if(isset($_GET['year'])) {
+	$cond['year'] = (int)$_GET['year'];
 }
-$_day = $_GET['day'];
-$_category = strtolower($_GET['category']);
-
-// It's ok. Proceed script.
+if(isset($_GET['category'])) {
+	$cond['category'] = strtolower($_GET['category']);
+}
+if(isset($_GET['keywords'])) {
+	$cond['$text'] =array('$search' => $_GET['keywords']);
+}
 
 // Connect to mongodb
 $m = new MongoClient();
@@ -19,19 +23,10 @@ $db = $m->selectDB('local');
 $collection = new MongoCollection($db, 'articles');
 
 // search
-$cursor = $collection->find(array('day' => $_day,'year' => $_year));
+$cursor = $collection->find($cond);
 $ret=NULL;
 foreach($cursor as $doc) {
-	if($doc[$_category]) {
-		foreach($doc[$_category] as $title) {
-			$ret[] = array(
-				'title'=>$title,
-				'year'=>$_year,
-				'day'=>$_day,
-				'category'=>$_category,
-			);
-		}
-	}
+	$ret[] = $doc;
 }
 
 header('Content-Type: application/json');

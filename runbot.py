@@ -21,26 +21,23 @@ def getPage(pageName):
 	return wikipedia.page(pageName)
 
 # Model_ insert document
-def addDoc(year, month_day):
+def addDoc(year, month_day, category_name, title):
         result = db.articles.insert_one(
             {
                 "day": month_day,
                 "year": year,
+                "category": category_name,
+                "title": title,
             }
         )
         return result.inserted_id
 
-# Model_ update document
-def updateDoc(doc_id, category_name, vals):
-        result = db.articles.update_one(
-            {"_id": doc_id},
-            {
-                "$set": {
-                    category_name: vals
-                }
-            }
+# Model_ remove document
+def deleteDoc(year, month_day):
+        result = db.articles.delete_many(
+            {"year": year,"day": month_day}
         )
-        return result.matched_count
+        return result.deleted_count
 
 # Model_ get document
 def getDoc(year, month_day):
@@ -54,30 +51,31 @@ from pymongo import MongoClient
 client = MongoClient()
 db = client.local
 
+# Create an index if it doesn't already exist
+db.articles.ensure_index("title")
+
 # Proceed
 next_date = datetime.datetime.strptime(start_date, "%d/%m/%y")
 finish_date = datetime.datetime.strptime(end_date, "%d/%m/%y")
 while(True):
         month_day = next_date.strftime("%B")+"_"+str(next_date.day)
-        doc_id = getDoc(next_date.year, month_day);
-        if doc_id is None:
-                # Create document
-                doc_id = addDoc(next_date.year, month_day)
+        year = next_date.year
         if debug == 1:
                 print(month_day,end="",flush=True)
         # Get and Update all categories
         curl_page = getPage(month_day)
+        # Delete old infos
+        deleteDoc(year, month_day)
+        # Put new infos
         for category_name in categories:
                 # Get category content
                 curl_sec = curl_page.section(category_name)
-                if curl_sec is None:
-                        # It's null, let it null
-                        items = None
-                else:
+                if curl_sec is not None:
                         # Convert string content to array
                         items = curl_sec.splitlines()
-                # Update document with category content
-                updateDoc(doc_id, category_name.lower(), items)
+                        for title in items:
+                                # Create document
+                                addDoc(year, month_day, category_name.lower(), title)
                 if debug == 1:
                         print('.',end="",flush=True)
         if debug == 1:
@@ -87,6 +85,4 @@ while(True):
                 break
         # Go next day
         next_date = next_date + datetime.timedelta(days=1)
-
-
 

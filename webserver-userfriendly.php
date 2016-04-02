@@ -1,28 +1,32 @@
 <?php
-// Get parameters
-if(!isset($_GET['year']) || !isset($_GET['day']) || !isset($_GET['category'])) {
-	die("Please specify the parameters. Sample: ?year=2005&day=March_13&category=births");
+// Build condition
+$cond = array();
+if(isset($_GET['day'])) {
+	if(preg_match("/^([a-z]+)_([0-9]+)$/i", $_GET['day'], $output_array) === 0) {
+		die("Same problems with <strong>day</strong> parameter.");
+	}
+	$cond['day'] = $_GET['day'];
 }
-// I received what I expect?
-$_year = (int)$_GET['year'];
-if(preg_match("/^([a-z]+)_([0-9]+)$/i", $_GET['day'], $output_array) === 0) {
-	die("Same problems with <strong>day</strong> parameter.");
+if(isset($_GET['year'])) {
+	$cond['year'] = (int)$_GET['year'];
 }
-$_day = $_GET['day'];
-$_category = strtolower($_GET['category']);
-
-// It's ok. Proceed script.
+if(isset($_GET['category'])) {
+	$cond['category'] = strtolower($_GET['category']);
+}
+if(isset($_GET['keywords'])) {
+	$cond['$text'] =array('$search' => $_GET['keywords']);
+}
 
 // Connect to mongodb
 $m = new MongoClient();
 $db = $m->selectDB('local');
 $collection = new MongoCollection($db, 'articles');
-	
-// search
-$cursor = $collection->find(array('day' => $_day,'year' => $_year));
+
+// Search in db
+$cursor = $collection->find($cond);
 $items=array();
 foreach ($cursor as $doc) {
-	$items = $doc[$_category];
+	$items[] = $doc;
 }
 ?><!doctype html>
 <html>
@@ -41,13 +45,13 @@ ul {padding:0;margin:0;}
 
 <body>
 <section class="wkpb-content">
-    <h1><?php echo $_day;?></h1>
+    <h1><?php //echo $_day;?></h1>
     <ul>
         <li>
-            <h2><?php echo ucfirst($_category);?></h2>
+            <h2><?php //echo ucfirst($_category);?></h2>
             <ul>
             	<?php foreach($items as $item):?>
-                <li><?php echo $item;?></li>
+                <li><?php echo $item['title'];?></li>
                 <?php endforeach; ?>
             </ul>
         </li>
