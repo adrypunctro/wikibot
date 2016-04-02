@@ -1,5 +1,6 @@
 import wikipedia
 import datetime
+import threading
 
 #### CONFIG ##############################
 
@@ -9,6 +10,9 @@ categories = ["Events","Births","Deaths","Holidays and observances"]
 # Init date interval
 start_date = "01/01/15"
 end_date   = "01/01/15"
+
+# Refresh interval (seconds)
+refresh = 60*60*2 # 2h
 
 # debug level
 debug = 1
@@ -55,34 +59,41 @@ db = client.local
 db.articles.ensure_index("title")
 
 # Proceed
-next_date = datetime.datetime.strptime(start_date, "%d/%m/%y")
-finish_date = datetime.datetime.strptime(end_date, "%d/%m/%y")
-while(True):
-        month_day = next_date.strftime("%B")+"_"+str(next_date.day)
-        year = next_date.year
+def main():
         if debug == 1:
-                print(month_day,end="",flush=True)
-        # Get and Update all categories
-        curl_page = getPage(month_day)
-        # Delete old infos
-        deleteDoc(year, month_day)
-        # Put new infos
-        for category_name in categories:
-                # Get category content
-                curl_sec = curl_page.section(category_name)
-                if curl_sec is not None:
-                        # Convert string content to array
-                        items = curl_sec.splitlines()
-                        for title in items:
-                                # Create document
-                                addDoc(year, month_day, category_name.lower(), title)
+                print("WikiPyBot proceed at "+datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        threading.Timer(refresh, main).start()
+        next_date = datetime.datetime.strptime(start_date, "%d/%m/%y")
+        finish_date = datetime.datetime.strptime(end_date, "%d/%m/%y")
+        while(True):
+                month_day = next_date.strftime("%B")+"_"+str(next_date.day)
+                year = next_date.year
                 if debug == 1:
-                        print('.',end="",flush=True)
-        if debug == 1:
-                print(" done")
-        # Check if it's end
-        if(next_date >= finish_date):
-                break
-        # Go next day
-        next_date = next_date + datetime.timedelta(days=1)
+                        print(month_day,end="",flush=True)
+                # Get and Update all categories
+                curl_page = getPage(month_day)
+                # Delete old infos
+                deleteDoc(year, month_day)
+                # Put new infos
+                for category_name in categories:
+                        # Get category content
+                        curl_sec = curl_page.section(category_name)
+                        if curl_sec is not None:
+                                # Convert string content to array
+                                items = curl_sec.splitlines()
+                                for title in items:
+                                        # Create document
+                                        addDoc(year, month_day, category_name.lower(), title)
+                        if debug == 1:
+                                print('.',end="",flush=True)
+                if debug == 1:
+                        print(" done")
+                # Check if it's end
+                if(next_date >= finish_date):
+                        break
+                # Go next day
+                next_date = next_date + datetime.timedelta(days=1)
+
+# Execute script
+main()
 
