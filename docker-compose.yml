@@ -1,5 +1,5 @@
 web:
-  restart: always
+  restart: "always"
   build: ./web
   expose:
     - "8000"
@@ -11,7 +11,7 @@ web:
   command: /usr/local/bin/gunicorn -w 2 -b :8000 app:app
 
 nginx:
-  restart: always
+  restart: "always"
   build: ./nginx/
   ports:
     - "80:80"
@@ -23,14 +23,14 @@ nginx:
     - web:web
 
 data:
-  restart: no
+  restart: "no"
   image: mongo:latest
   volumes:
     - /var/lib/mongosql
   command: true
 
 mongo:
-  restart: always
+  restart: "always"
   image: mongo:latest
   volumes_from:
     - data
