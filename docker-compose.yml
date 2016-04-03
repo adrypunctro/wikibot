@@ -1,6 +1,11 @@
-mongodb:
-  image: adrypunctro/wkpb-mongodb
 application:
-  image: adrypunctro/wkpb-application
+  build: .
+  command: python -u runbot.py
+  ports:
+    - "5000:5000"
+  volumes:
+    - .:/todo
   links:
-   - mongodb
+   - db
+db:
+  image: mongo:3.0.2
