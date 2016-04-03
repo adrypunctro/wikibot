@@ -17,6 +17,10 @@ refresh = 60*60*2 # 2h
 # debug level
 debug = 1
 
+#
+db_host = os.environ['DB_PORT_27017_TCP_ADDR']
+db_port = 27017
+
 ##########################################
 
 
@@ -50,9 +54,14 @@ def getDoc(year, month_day):
                 return document["_id"]
         return None;
 
+if debug == 1:
+        print("CONFIG")
+        print(db_host)
+        print(db_port)
+
 # MongoDb connect
 from pymongo import MongoClient
-client = MongoClient()
+client = MongoClient(db_host, db_port)
 db = client.local
 
 # Create an index if it doesn't already exist
