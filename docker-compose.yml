@@ -1,7 +1,7 @@
-application:
+adrypunctro/wkpb-application:
   build: .
   command:
   links:
-  - database
-database:
-  image: database
+  - adrypunctro/wkpb-mongodb
+adrypunctro/wkpb-mongodb:
+  image: adrypunctro/wkpb-mongodb
