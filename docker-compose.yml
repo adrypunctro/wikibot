@@ -1,0 +1,7 @@
+application:
+  build: .
+  command:
+  links:
+  - database
+database:
+  image: database
