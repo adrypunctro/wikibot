@@ -1,11 +1,38 @@
-application:
-  build: .
-  command: python -u runbot.py
-  ports:
-    - "5000:5000"
-  volumes:
-    - .:/todo
+web:
+  restart: always
+  build: ./web
+  expose:
+    - "8000"
   links:
-   - db
-db:
-  image: mongo:3.0.2
+    - mongo:mongo
+  volumes:
+    - /usr/src/app/static
+  env_file: .env
+  command: /usr/local/bin/gunicorn -w 2 -b :8000 app:app
+
+nginx:
+  restart: always
+  build: ./nginx/
+  ports:
+    - "80:80"
+  volumes:
+    - /www/static
+  volumes_from:
+    - web
+  links:
+    - web:web
+
+data:
+  restart: no
+  image: mongo:latest
+  volumes:
+    - /var/lib/mongosql
+  command: true
+
+mongo:
+  restart: always
+  image: mongo:latest
+  volumes_from:
+    - data
+  ports:
+    - "5432:5432"
