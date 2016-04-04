@@ -7,7 +7,7 @@ import os
 #### CONFIG ##############################
 
 #
-db_host = os.environ.get('MONGO_PORT_27017_TCP_ADDR', '127.0.0.1')
+db_host = os.environ.get('WIKI_DB_1_PORT_27017_TCP_ADDR', '127.0.0.1')
 db_port = 27017
 
 ##########################################
