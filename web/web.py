@@ -30,7 +30,7 @@ def index():
         if day is not None:
             condition['day'] = day
         if year is not None:
-            condition['year'] = year
+            condition['year'] = int(year)
         if category is not None:
             condition['category'] = category
         if keywords is not None:
