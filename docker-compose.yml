@@ -1,31 +1,27 @@
 web:
-#  restart: "always"
   build: ./web
   ports:
     - "5000:5000"
-#  expose:
-#    - "8000"
   links:
     - db
   volumes:
     - ./web:/wiki
-#  env_file: .env
   command: "python -u web.py"
   
 bot:
-#  restart: "always"
   build: ./web
   ports:
     - "6000:6000"
-#  expose:
-#    - "8000"
   links:
     - db
   volumes:
     - ./web:/wiki
-#  env_file: .env
   command: "python -u runbot.py"
 
+db:
+  image: mongo:latest
+  
+# if we want to balanced
 #nginx:
 #  restart: "always"
 #  build: ./nginx/
@@ -37,18 +33,3 @@ bot:
 #    - web
 #  links:
 #    - web:web
-
-#data:
-#  restart: "no"
-#  image: mongo:latest
-#  volumes:
-#    - /var/lib/mongosql
-#  command: "true"
-
-db:
-#  restart: "always"
-  image: mongo:latest
-#  volumes_from:
-#    - data
-#  ports:
-#    - "5432:5432"

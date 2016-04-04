@@ -11,13 +11,13 @@ categories = ["Events","Births","Deaths","Holidays and observances"]
 
 # Init date interval
 start_date = "01/01/15"
-end_date   = "01/01/15"
+end_date   = "31/12/15"
 
 # Refresh interval (seconds)
 refresh = 60*60*2 # 2h
 
-# debug level
-debug = 1
+# debug level (boolean)
+debug = 0
 
 #
 db_host = os.environ.get('DB_PORT_27017_TCP_ADDR', '127.0.0.1')
@@ -55,11 +55,6 @@ def getDoc(year, month_day):
         for document in cursor:
                 return document["_id"]
         return None;
-
-if debug == 1:
-        print("CONFIG")
-        print(db_host)
-        print(db_port)
 
 # MongoDb connect
 from pymongo import MongoClient
