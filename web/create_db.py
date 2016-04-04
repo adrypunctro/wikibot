@@ -1,6 +1,5 @@
 # create_db.py
-
-
-from app import db
-
-db.create_all()
+from pymongo import MongoClient
+c = MongoClient()
+db = c.wiki_app
+collection = db.articles
