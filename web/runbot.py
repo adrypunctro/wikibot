@@ -1,6 +1,8 @@
 import wikipedia
 import datetime
 import threading
+from pymongo import MongoClient
+import os
 
 #### CONFIG ##############################
 
@@ -18,7 +20,7 @@ refresh = 60*60*2 # 2h
 debug = 1
 
 #
-db_host = os.environ['DB_PORT_27017_TCP_ADDR']
+db_host = os.environ.get('MONGO_PORT_27017_TCP_ADDR', '127.0.0.1')
 db_port = 27017
 
 ##########################################
@@ -62,10 +64,10 @@ if debug == 1:
 # MongoDb connect
 from pymongo import MongoClient
 client = MongoClient(db_host, db_port)
-db = client.local
+db = client.wiki_app
 
 # Create an index if it doesn't already exist
-db.articles.ensure_index("title")
+db.articles.ensure_index([('title', "text")])
 
 # Proceed
 def main():
